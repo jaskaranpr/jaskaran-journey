@@ -1,8 +1,8 @@
 // Scroll-scrubbed candlestick chart. draw.chart(p, stage) is a pure function of p (0..1).
 (window.draw = window.draw || {}).chart = (function () {
-  var WHITE = '#f3f6ff', HAZE = '#8fb2ee', NAVY = '#071636';
-  var GRID = 'rgba(243,246,255,.07)', LABEL = 'rgba(243,246,255,.5)';
-  var FONT = '11px "Instrument Sans", sans-serif';
+  var WHITE = '#fdfdfd', HAZE = '#aed1ea', NAVY = '#021533';
+  var GRID = 'rgba(253,253,253,.07)', LABEL = 'rgba(253,253,253,.55)';
+  var FONT = '500 11px Figtree, sans-serif';
   var N = 90, FAST = 9, SLOW = 21;
 
   // Seeded data, generated once: random walk with a mild uptrend.
@@ -163,8 +163,8 @@
       hline(tpy, ex, WHITE, [5, 4]);
       hline(sly, ex, HAZE, [5, 4]);
       ctx.fillStyle = WHITE; ctx.beginPath(); ctx.arc(ex, ey, 3, 0, Math.PI * 2); ctx.fill();
-      pill(x1 - 4, tpy, 'TP', WHITE, true);
-      pill(x1 - 4, sly, 'SL', HAZE, true);
+      pill(x1 - 4, tpy, 'Target', WHITE, true);
+      pill(x1 - 4, sly, 'Stop', HAZE, true);
       ctx.globalAlpha = 1;
     }
 
@@ -186,7 +186,7 @@
       var qt = seg(p, 0.66, 0.92) * (N - 1);
       var qy = function (v) { return py1 - (v - eqLo) / (eqHi - eqLo || 1) * (py1 - py0 - 14); };
       ctx.globalAlpha = pa;
-      ctx.fillStyle = LABEL; ctx.textBaseline = 'top'; ctx.fillText('Backtest P&L', x0, py0);
+      ctx.fillStyle = LABEL; ctx.textBaseline = 'top'; ctx.fillText('Tested on past days', x0, py0);
       ctx.textBaseline = 'middle';
       ctx.strokeStyle = GRID; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(x0, px(py1)); ctx.lineTo(x1, px(py1)); ctx.stroke();
