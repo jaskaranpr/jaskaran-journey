@@ -1,0 +1,153 @@
+/* two colours, like the film this is based on: one blue ramp and white */
+:root{
+  --b0:#021533;--b1:#072f68;--b2:#0d3673;--b3:#1d498b;--b4:#3569ad;--b5:#6f9fd3;--b6:#aed1ea;--b7:#d6e9f6;--w:#fdfdfd;--ink:#0b1d44;
+  --font:Figtree,system-ui,sans-serif;
+  --edge:clamp(20px,6.5vw,110px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--b0);color:var(--w);scrollbar-width:none}
+html::-webkit-scrollbar{display:none}
+body{font:500 16px/1.5 var(--font);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit;text-underline-offset:.2em;text-decoration-thickness:1px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--b6);outline-offset:4px;border-radius:8px}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+.pa{font-family:"Noto Sans Gurmukhi",var(--font)}
+
+/* film grain and a soft vignette over everything */
+.grain{position:fixed;inset:-150px;z-index:30;pointer-events:none;opacity:.11;mix-blend-mode:overlay;animation:grain 1s steps(6) infinite;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+@keyframes grain{0%{transform:translate(0,0)}17%{transform:translate(-60px,30px)}33%{transform:translate(40px,-70px)}50%{transform:translate(-30px,90px)}67%{transform:translate(80px,20px)}83%{transform:translate(-90px,-40px)}}
+body::before{content:"";position:fixed;inset:0;z-index:29;pointer-events:none;background:radial-gradient(130% 100% at 50% 42%,transparent 55%,rgba(2,21,51,.42));transition:opacity .8s}
+body.on-light::before{opacity:.12}
+
+/* stages: fixed frames, shown while their stretch of page is on screen */
+.scene{height:calc(var(--len,3)*100svh)}
+.stage{position:fixed;inset:0;overflow:hidden;visibility:hidden;contain:strict;background:var(--b0)}
+.stage.on{visibility:visible}
+/* scenes that aren't on screen keep still, so their ambient loops cost nothing */
+.stage:not(.on),.stage:not(.on) *{animation-play-state:paused!important}
+.stage.light{background:var(--w)}
+.world{position:absolute;left:0;top:0}
+.L{position:absolute;inset:0;width:100%;height:100%;overflow:visible;will-change:transform}
+.L.blur2{filter:blur(calc(2px*var(--S)))}
+.L.blur6{filter:blur(calc(6px*var(--S)))}
+.L.blur12{filter:blur(calc(12px*var(--S)))}
+#veil{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:0;background:var(--b0)}
+#veil[data-c=white]{background:var(--w)}
+
+/* motion that runs on its own clock */
+.dust{position:absolute;pointer-events:none}
+.dust i{position:absolute;width:calc(var(--s)*1px*var(--S));height:calc(var(--s)*1px*var(--S));border-radius:50%;background:var(--w);
+  animation:mote linear infinite alternate,twinkle ease-in-out infinite alternate}
+.dust i.bk{filter:blur(calc(2.2px*var(--S)));opacity:.5}
+@keyframes mote{to{transform:translate(var(--dx),var(--dy))}}
+@keyframes twinkle{from{opacity:.15}to{opacity:.9}}
+.flap{animation:flap .55s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes flap{to{transform:scaleY(-.6)}}
+.eye .lid{transform-box:fill-box;transform-origin:50% 60%;animation:blink 5.6s infinite}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}95.5%{transform:scaleY(.08)}}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.8deg)}}
+.flicker{animation:flicker 7s infinite}
+@keyframes flicker{0%,100%{opacity:1}41%{opacity:1}42%{opacity:.82}43%{opacity:1}71%{opacity:.93}72%{opacity:1}}
+.drift{animation:drift 60s linear infinite alternate}
+@keyframes drift{to{transform:translateX(calc(140px*var(--S)))}}
+/* whole-layer motion: runs on the compositor, so big layers never repaint for it */
+.L.drift-l{animation:driftL 90s linear infinite alternate}
+@keyframes driftL{to{translate:calc(150px*var(--S)) 0}}
+.L.breeze{animation:breeze 5.5s ease-in-out infinite alternate}
+@keyframes breeze{from{translate:calc(-5px*var(--S)) 0}to{translate:calc(7px*var(--S)) calc(1px*var(--S))}}
+
+/* the words */
+.copy{position:absolute;inset:0;pointer-events:none;z-index:5;--p:0}
+.beat{position:absolute;max-width:min(22ch,86vw);font:500 clamp(1.5rem,2.75vw,2.9rem)/1.16 var(--font);letter-spacing:-.017em;text-wrap:balance;
+  --out:clamp(0,(var(--b) - var(--p))/var(--fo),1);opacity:var(--out);filter:blur(calc((1 - var(--out))*6px));
+  text-shadow:0 2px 34px rgba(2,21,51,.55)}
+.beat .w{display:inline-block;--t:clamp(0,(var(--p) - var(--a) - var(--k)*var(--st))/var(--fi),1);
+  opacity:var(--t);transform:translateY(calc((1 - var(--t))*.32em));filter:blur(calc((1 - var(--t))*9px))}
+.beat.whole{--t:clamp(0,(var(--p) - var(--a))/var(--fi),1);opacity:min(var(--t),var(--out));transform:translateY(calc((1 - var(--t))*18px))}
+.light .beat,.beat.ink{color:var(--ink);text-shadow:none}
+.size-m{font-size:clamp(1.15rem,1.8vw,1.75rem);max-width:min(28ch,86vw)}
+.size-xl{font:600 clamp(2.6rem,6.4vw,6.4rem)/1 var(--font);letter-spacing:-.035em;max-width:min(16ch,90vw)}
+.pos-c{left:50%;top:50%;translate:-50% -50%;text-align:center}
+.pos-top{left:50%;top:15svh;translate:-50% 0;text-align:center}
+.pos-bottom{left:50%;bottom:13svh;translate:-50% 0;text-align:center}
+.pos-tl{left:var(--edge);top:16svh}
+.pos-tr{right:var(--edge);top:16svh;text-align:right}
+.pos-bl{left:var(--edge);bottom:14svh}
+.pos-br{right:var(--edge);bottom:14svh;text-align:right}
+.pos-l{left:var(--edge);top:50%;translate:0 -50%}
+.pos-r{right:var(--edge);top:50%;translate:0 -50%;text-align:right}
+.size-title{max-width:none;width:100%;text-align:center;display:grid;justify-items:center;gap:.5rem;top:12svh;text-shadow:0 2px 40px rgba(2,21,51,.6)}
+.size-title .pa{font-size:clamp(.95rem,1.4vw,1.2rem);opacity:.7}
+.size-title .name{font:600 clamp(3.1rem,9.5vw,9rem)/.94 var(--font);letter-spacing:-.04em}
+.size-title .role{font:600 clamp(.72rem,.95vw,.82rem)/1 var(--font);letter-spacing:.18em;text-transform:uppercase;opacity:.72;margin-top:.4rem}
+.size-end{display:grid;justify-items:center;gap:1.4rem;text-align:center;max-width:min(30ch,88vw);pointer-events:auto}
+.size-end .hello{font:500 clamp(1.6rem,3vw,3rem)/1.15 var(--font);letter-spacing:-.02em;text-wrap:balance}
+.size-end .mail{font:600 clamp(1.05rem,1.6vw,1.35rem) var(--font)}
+.size-end .links{display:flex;flex-wrap:wrap;justify-content:center;gap:.4rem 1.4rem;font-size:.95rem;opacity:.8}
+.again{all:unset;cursor:pointer;margin-top:1rem;font:600 .78rem var(--font);letter-spacing:.16em;text-transform:uppercase;padding:.85rem 1.4rem;border:1px solid currentColor;border-radius:99px;opacity:.75;transition:opacity .3s}
+.again:hover{opacity:1}
+
+/* page chrome */
+.hud,.tools,.rail,.bar{color:var(--chrome,var(--w));transition:color .6s}
+body.on-light{--chrome:var(--ink)}
+.hud{position:fixed;z-index:20;top:clamp(16px,2.4vw,28px);left:clamp(18px,2.6vw,34px);display:flex;gap:16px;align-items:baseline;font:600 14px/1.3 var(--font)}
+.hud a{text-decoration:none}
+.chapter{font-weight:500;opacity:.68}
+.tools{position:fixed;z-index:20;top:clamp(12px,2.1vw,24px);right:clamp(14px,2.4vw,30px);display:flex;align-items:center;gap:6px;font:600 13px var(--font)}
+.tools a,.snd{all:unset;cursor:pointer;display:flex;align-items:center;gap:9px;height:36px;padding:0 12px;border-radius:99px}
+.tools a:hover,.snd:hover{background:color-mix(in srgb,currentColor 12%,transparent)}
+.snd i{width:2px;height:12px;border-radius:2px;background:currentColor;transform:scaleY(.25);transform-origin:50% 100%;transition:transform .5s}
+.snd i+i{margin-left:-6px}
+.snd span{margin-left:2px}
+.snd[aria-pressed=true] i{animation:eq 1.1s ease-in-out infinite alternate}
+.snd[aria-pressed=true] i:nth-child(2){animation-duration:.8s;animation-delay:-.3s}
+.snd[aria-pressed=true] i:nth-child(3){animation-duration:1.3s;animation-delay:-.6s}
+.snd[aria-pressed=true] i:nth-child(4){animation-duration:.95s;animation-delay:-.2s}
+@keyframes eq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.rail{position:fixed;z-index:20;right:clamp(12px,2vw,26px);top:50%;translate:0 -50%;display:grid;gap:5px}
+.rail button{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;gap:10px;height:14px;font:500 12px var(--font)}
+.rail button::after{content:"";width:10px;height:1px;background:currentColor;opacity:.4;transition:width .35s,opacity .35s}
+.rail button[aria-current=true]::after{width:26px;opacity:1}
+.rail button span{opacity:0;translate:8px 0;transition:opacity .3s,translate .3s;white-space:nowrap}
+.rail:hover button span,.rail button:focus-visible span{opacity:.9;translate:0 0}
+.bar{position:fixed;z-index:20;left:0;right:0;bottom:0;height:2px}
+.bar::before{content:"";position:absolute;inset:0;background:currentColor;opacity:.14}
+.bar i{position:absolute;inset:0;background:currentColor;opacity:.65;transform-origin:0 50%;transform:scaleX(0)}
+
+/* the way in: sound or silence */
+.gate{position:fixed;z-index:22;left:0;right:0;bottom:clamp(28px,5.5svh,60px);display:grid;justify-items:center;gap:14px;transition:opacity .9s,visibility .9s}
+.gate.off{opacity:0;visibility:hidden}
+.begin{all:unset;cursor:pointer;display:flex;align-items:center;gap:12px;padding:15px 26px;border-radius:99px;border:1px solid rgba(253,253,253,.55);
+  font:600 15px var(--font);letter-spacing:.01em;backdrop-filter:blur(6px);background:rgba(2,21,51,.25);transition:background .4s,border-color .4s,opacity .6s}
+.begin:hover,.begin:focus-visible{background:rgba(253,253,253,.1);border-color:var(--w)}
+.begin svg{width:16px;height:16px}
+.quiet{all:unset;cursor:pointer;font:500 13px var(--font);opacity:.62;text-decoration:underline;text-underline-offset:.25em;transition:opacity .6s}
+.hint{position:absolute;left:50%;bottom:0;translate:-50% 0;display:grid;justify-items:center;gap:10px;font:600 11px var(--font);letter-spacing:.2em;text-transform:uppercase;opacity:0;transition:opacity .8s .3s}
+.hint::after{content:"";width:1px;height:36px;background:linear-gradient(var(--w),transparent);animation:hint 2.2s ease-in-out infinite}
+@keyframes hint{0%{transform:scaleY(0);transform-origin:0 0}45%{transform:scaleY(1);transform-origin:0 0}55%{transform:scaleY(1);transform-origin:0 100%}100%{transform:scaleY(0);transform-origin:0 100%}}
+.gate.chosen .begin,.gate.chosen .quiet{opacity:0;pointer-events:none}
+.gate.chosen .hint{opacity:.75}
+
+@media (max-width:760px){
+  .rail,.chapter{display:none}
+  .tools a{display:none}
+  .pos-tl,.pos-tr,.pos-top{top:12svh}
+  .pos-bl,.pos-br,.pos-bottom{bottom:11svh}
+  .pos-l,.pos-r{top:12svh;translate:none}
+}
+
+
+/* ---- scene details ---- */
+.s-open .lights{animation:lighton 2.6s .4s ease-out both}
+@keyframes lighton{0%{opacity:0}14%{opacity:.7}18%{opacity:.05}26%{opacity:.85}31%{opacity:.25}44%,100%{opacity:1}}
+.kite{transform-box:fill-box;transform-origin:50% 100%;animation:kite 4.2s ease-in-out infinite alternate}
+@keyframes kite{from{transform:rotate(-2deg)}to{transform:rotate(2.5deg) translateY(-6px)}}
+.smoke circle{transform-box:fill-box;transform-origin:50% 50%;animation:smoke 6.4s linear infinite;opacity:0}
+@keyframes smoke{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:.45}100%{transform:translate(34px,-110px) scale(2.6);opacity:0}}
+
+@media (prefers-reduced-motion:reduce){
+  .grain,.dust i,.flap,.sway,.flicker,.drift,.L.drift-l,.L.breeze,.eye .lid,.hint::after,.smoke circle,.kite{animation:none}
+}
