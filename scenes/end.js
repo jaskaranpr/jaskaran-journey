@@ -1,19 +1,17 @@
 // The end card: white, the way the Fold film ends. The sun from the last scene fades into pale sky at the top,
-// Chakar's poplars and water tower sit small on a far horizon, and a little mark of him sits above the words.
+// Chakar's poplars and water tower sit small on a far horizon, and the film's eye sits above the words.
 (() => {
   const {C, rng, keys, n1, bird} = K;
 
-  // his mark: head and shoulders, curls and all, in ink inside a ring
+  // his mark: the eye from the film, in ink, the way the whole story has been looking at things
   function mark() {
-    const b = FIG.bust({up: -12});
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -60 120 120"><defs><clipPath id="c"><circle r="52"/></clipPath></defs>` +
-      `<circle r="56" fill="none" stroke="${C.ink}" stroke-width="2.6"/><g clip-path="url(#c)"><g transform="translate(-4 2) scale(.95)"><path d="${b.d}" fill="${C.ink}"/></g></g></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-7.8 -7.2 13.2 9.6">${FIG.eye(FIG.P(0, 0), 1, 1, -14)}</svg>`;
     return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   }
 
   scene('end', {
     bg: C.w,
-    css: `.s-end .size-end::before{content:"";width:68px;height:68px;background:var(--mark) center/contain no-repeat;margin-bottom:.1rem}
+    css: `.s-end .size-end::before{content:"";width:66px;height:48px;background:var(--mark) center/contain no-repeat;margin-bottom:.1rem}
       .s-end .dust i{background:${C.b5}}
       .s-end .ename{font:500 13px "Noto Sans Gurmukhi",var(--font)}`,
     init(stage) { stage.style.setProperty('--mark', mark()); },

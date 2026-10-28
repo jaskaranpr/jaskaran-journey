@@ -1,21 +1,23 @@
 // The leap. A white card with a single line and a tiny figure at the end of a ledge. He steps off, the white opens
-// like an eye, and he's falling backwards through a bright sky: clouds rushing up past him, dotted rings and
+// like an eye, and he's falling backwards through a bright sky: clouds rushing up past him,
 // bubbles drifting, light from above. He drops into a bank of cloud and everything goes white.
 (() => {
   const {C, rng, keys, span, clamp, n1, beam, dust, fig} = K;
   const FALL = 2400;                                   // how far the camera drops while he falls (board units at z = 1)
   const LX = 800, LY = 668;                            // where the ledge ends on the white card
 
-  const cloud = (x, y, s, r, col, top) => {
-    let out = '';
-    const n = 7 + Math.floor(r() * 6);
-    for (let i = 0; i < n; i++) {
-      const t = i / (n - 1), cx = x + (t - .5) * 220 * s, cy = y - Math.sin(t * Math.PI) * (36 + r() * 30) * s;
-      out += `<circle cx="${n1(cx)}" cy="${n1(cy)}" r="${n1((34 + r() * 30) * s)}" fill="${col}"/>`;
+  // a cumulus: puffs heaped highest in the middle, each lit from above (the fill is a top-to-bottom gradient per puff),
+  // drawn back to front so every lower puff shows its bright top against the shade under the one behind it
+  const cloud = (x, y, s, r) => {
+    const w = 260 * s, puffs = [];
+    for (let i = 0, n = 9 + Math.floor(r() * 6); i < n; i++) {
+      const t = r(), h = Math.sin(t * Math.PI), rr = (24 + h * 36 + r() * 16) * s;
+      puffs.push([x + (t - .5) * w, y + 4 * s - rr - h * (8 + r() * 34) * s, rr]);
     }
-    return out + `<ellipse cx="${n1(x)}" cy="${n1(y + 6 * s)}" rx="${n1(150 * s)}" ry="${n1(30 * s)}" fill="${col}"/>` +
-      `<ellipse cx="${n1(x + 10 * s)}" cy="${n1(y + 14 * s)}" rx="${n1(130 * s)}" ry="${n1(18 * s)}" fill="${C.b5}" opacity=".35"/>` +
-      `<ellipse cx="${n1(x - 20 * s)}" cy="${n1(y - 64 * s)}" rx="${n1(70 * s)}" ry="${n1(16 * s)}" fill="${top}" opacity=".55"/>`;
+    puffs.sort((a, b) => a[1] - b[1]);
+    const x0 = Math.min(...puffs.map(([cx, , rr]) => cx - rr * .6)), x1 = Math.max(...puffs.map(([cx, , rr]) => cx + rr * .6));
+    return `<g fill="url(#lpPuff)">${puffs.map(([cx, cy, rr]) => `<circle cx="${n1(cx)}" cy="${n1(cy)}" r="${n1(rr)}"/>`).join('')}` +
+      `<rect x="${n1(x0)}" y="${n1(y - 22 * s)}" width="${n1(x1 - x0)}" height="${n1(26 * s)}" rx="${n1(13 * s)}" fill="${C.b6}" opacity=".5"/></g>`;
   };
   const bubble = (x, y, rr, k) => `<g class="lp-bob" style="animation-delay:-${n1(k * 1.7)}s"><circle cx="${x}" cy="${y}" r="${rr}" fill="url(#lpBub)" stroke="${C.w}" stroke-width="1.2" stroke-opacity=".55"/>` +
     `<circle cx="${x}" cy="${y}" r="${n1(rr * .82)}" fill="none" stroke="${C.b6}" stroke-width="1" opacity=".5"/>` +
@@ -30,35 +32,29 @@
   let els = {};
   scene('leap', {
     bg: C.w,
-    css: `.lp-ring{transform-box:fill-box;transform-origin:50% 50%;animation:lpSpin 40s linear infinite}
-      @keyframes lpSpin{to{transform:rotate(360deg)}}
-      .lp-bob{animation:lpBob 6s ease-in-out infinite alternate}@keyframes lpBob{to{transform:translate(8px,-14px)}}`,
+    css: `.lp-bob{animation:lpBob 6s ease-in-out infinite alternate}@keyframes lpBob{to{transform:translate(8px,-14px)}}`,
     layers() {
       const r = rng(5);
       const sky = `<linearGradient id="lpSky" gradientUnits="userSpaceOnUse" x1="0" y1="-200" x2="0" y2="1000">
           <stop offset="0" stop-color="${C.b7}"/><stop offset=".22" stop-color="${C.b6}"/><stop offset=".55" stop-color="${C.b5}"/><stop offset="1" stop-color="${C.b4}"/></linearGradient>
         <radialGradient id="lpBub" cx=".5" cy=".5" r=".5"><stop offset=".55" stop-color="${C.w}" stop-opacity="0"/><stop offset=".86" stop-color="${C.b7}" stop-opacity=".22"/><stop offset="1" stop-color="${C.w}" stop-opacity=".6"/></radialGradient>
+        <linearGradient id="lpPuff" x1="0" y1="0" x2="0" y2="1"><stop offset=".1" stop-color="${C.w}"/><stop offset=".55" stop-color="${C.w}"/><stop offset="1" stop-color="${C.b6}"/></linearGradient>
         <rect x="-600" y="-600" width="2800" height="2200" fill="url(#lpSky)"/>
         <ellipse cx="800" cy="-140" rx="700" ry="300" fill="${C.w}" opacity=".7" filter="url(#b30)"/>`;
       const light = beam({x: 640, y: -200, top: 120, spread: 520, h: 1300, o: .34, tilt: -80}) + beam({x: 980, y: -200, top: 90, spread: 420, h: 1300, o: .26, tilt: 90}) +
         beam({x: 360, y: -200, top: 60, spread: 300, h: 1200, o: .16, tilt: -160});
       let far = '';
-      for (let i = 0; i < 14; i++) far += cloud(n1(-200 + r() * 2000), n1(200 + i * 110 + r() * 60), .4 + r() * .4, r, C.b6, C.w);
-      let rings = '';
-      for (let i = 0; i < 16; i++) {
-        const x = n1(r() * 1600), y = n1(-100 + i * 140 + r() * 80), rr = n1(26 + r() * 70);
-        rings += `<circle class="lp-ring" cx="${x}" cy="${y}" r="${rr}" fill="none" stroke="${C.w}" stroke-width="2" stroke-dasharray="1.5 ${n1(7 + r() * 6)}" stroke-linecap="round" opacity="${n1(.35 + r() * .35)}" style="animation-duration:${n1(30 + r() * 40)}s"/>`;
-      }
+      for (let i = 0; i < 14; i++) far += cloud(-200 + r() * 2000, 200 + i * 110 + r() * 60, .4 + r() * .4, r);
       let bubs = '';
       for (let i = 0; i < 18; i++) {
         const x = n1(80 + r() * 1440), y = n1(260 + i * 140 + r() * 90);
         if (Math.abs(x - 800) > 150 || r() < .3) bubs += bubble(x, y, n1(10 + r() * 22), i);
       }
       let near = '';
-      for (let i = 0; i < 9; i++) near += cloud(n1(r() < .5 ? -120 + r() * 520 : 1180 + r() * 520), n1(900 + i * 320 + r() * 120), 1.5 + r() * 1.1, r, C.b6, C.w);
+      for (let i = 0; i < 9; i++) near += cloud(r() < .5 ? -120 + r() * 520 : 1180 + r() * 520, 900 + i * 320 + r() * 120, 1.5 + r() * 1.1, r);
       // the bank of cloud he falls into at the end
       let bank = '';
-      for (let i = 0; i < 9; i++) bank += cloud(n1(-200 + i * 260), 3800 + (i % 2) * 70, 2.6, r, C.b7, C.w);
+      for (let i = 0; i < 9; i++) bank += cloud(-200 + i * 260, 3800 + (i % 2) * 70, 2.6, r);
       bank += `<rect x="-600" y="3770" width="2800" height="1400" fill="${C.b7}"/>`;
       const me = `<g id="lpMe"><path id="lpBody" class="fig" filter="url(#fuzz)" fill="${C.w}"/></g>`;
       // the card: a line of ledge, a small figure in ink standing at its end
@@ -78,7 +74,6 @@
         {z: .05, svg: light},
         {z: .05, html: dust([[300, -100], [1300, -100], [1500, 900], [100, 900]], 50, 23, .2)},
         {z: .22, cls: 'blur2', svg: `<g opacity=".8">${far}</g>`},
-        {z: .4, svg: rings},
         {z: .6, svg: bubs},
         {z: 0, svg: me},
         {z: 1.35, cls: 'blur6', svg: `<g opacity=".92">${near}</g>${bank}`},

@@ -206,25 +206,28 @@ window.FIG = (() => {
   }
 
   // ---- close-up: head and shoulders from behind, face turned up and to the right, like the film's opening shot ----
-  // units are centimetres centred on the base of the neck; returns the body and where the eye sits
+  // units are centimetres centred on the base of the neck; returns the body, where the eye sits and how it tilts
   function bust(o = {}, seed = 9) {
     const up = o.up ?? -16, c = P(5, -24);
     const s = [smooth([P(-50, 46), P(-48, 28), P(-42, 17), P(-31, 9), P(-19, 3), P(-10, -3), P(-4, -9), P(7, -9), P(13, -3), P(22, 2), P(33, 8), P(43, 16),
       P(49, 28), P(51, 46)], 5)];                                               // shoulders under a t-shirt
     s.push(limb(P(0, 3), 10, add(c, P(-1.5, 8)), 8.2));                         // neck
     s.push(...head(c, up, 1.08, seed));
-    return {d: path(s), eye: add(c, rot(P(7.2, -.8), up))};
+    return {d: path(s), eye: add(c, rot(P(3, -1.6), up)), tilt: up - 6};
   }
 
-  // the eye from the film: a heavy brow, and an ink almond with a white ball showing at one side.
+  // the eye from the film, measured off a frame of it: a brow arching over the outer corner, and a big ink almond
+  // with the white ball sitting low against the lower lid, which shows as a hairline.
   // c is the almond's centre, sc its scale (the almond is 10 units wide), look slides the white ball along it
+  const ALMOND = 'M-5 .4C-3.6 -3.2 1.6 -4.4 5 -.4Q.6 2.6 -5 .4Z';
   let eyes = 0;
   function eye(c, sc = 1, look = 1, tilt = -24) {
     const id = 'eyeclip' + (++eyes);
     return `<g class="eye" transform="translate(${c.x.toFixed(1)} ${c.y.toFixed(1)}) rotate(${tilt}) scale(${sc})">` +
-      `<clipPath id="${id}"><path d="M-5 0Q-.5 -7.2 5 0Q0 2.8 -5 0Z"/></clipPath>` +
-      `<path class="brow" d="M-8.6 -2.4Q-6.8 -6.8 -1.2 -7.6" fill="none" stroke="#0b1d44" stroke-width="2.1" stroke-linecap="round"/>` +
-      `<g class="lid"><path d="M-5 0Q-.5 -7.2 5 0Q0 2.8 -5 0Z" fill="#0b1d44"/><circle clip-path="url(#${id})" cx="${(1.7 * look).toFixed(2)}" cy="1" r="2.35" fill="#fdfdfd"/></g></g>`;
+      `<clipPath id="${id}"><path d="${ALMOND}"/></clipPath>` +
+      `<path class="brow" d="M-5.9 -3.9Q-3.1 -7.4 1.3 -5.7" fill="none" stroke="#0b1d44" stroke-width="1.35" stroke-linecap="round"/>` +
+      `<g class="lid"><path d="${ALMOND}" fill="#0b1d44"/><circle clip-path="url(#${id})" cx="${(1.1 * look).toFixed(2)}" cy="1" r="2.3" fill="#fdfdfd"/>` +
+      `<path d="M5 -.4Q.6 2.6 -5 .4" fill="none" stroke="#aed1ea" stroke-width=".22"/></g></g>`;
   }
 
   return {side, walk, front, bust, eye, reach, STRIDE, BUILD, P, smooth, ring, limb, place, path, rot, add};

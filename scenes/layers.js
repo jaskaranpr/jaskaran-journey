@@ -23,7 +23,7 @@
     town += `<g fill="${C.b1}"><path d="M300 470L306 412M330 470L324 412" stroke="${C.b1}" stroke-width="3"/><rect x="292" y="392" width="46" height="24" rx="4"/>
       <path d="M352 470V436H404V470Z"/><path d="M362 436Q378 404 394 436Z"/><path d="M378 412V400" stroke="${C.b1}" stroke-width="2"/></g>`;
     const me = FIG.bust({up: -22}, 31);
-    const self = `<g transform="translate(176 548) scale(3.3)"><path d="${me.d}" filter="url(#fuzzc)" fill="${C.w}"/>${FIG.eye({x: me.eye.x - 2.4, y: me.eye.y + .3}, .95, 1, -34)}</g>`;
+    const self = `<g transform="translate(176 548) scale(3.3)"><path d="${me.d}" filter="url(#fuzzc)" fill="${C.w}"/>${FIG.eye(me.eye, 1.25, 1, me.tilt)}</g>`;
     let title = `<text x="210" y="96" text-anchor="middle" font-family="Figtree, sans-serif" font-weight="600" font-size="50" letter-spacing="-1" fill="${C.w}">jaskaran.psd</text>
       <path d="M150 120H270" stroke="${C.b6}" stroke-width="1.5" opacity=".7"/>`;
     for (const [x, y, s] of [[92, 60, 1], [336, 46, .7], [360, 120, .5], [70, 140, .6]])

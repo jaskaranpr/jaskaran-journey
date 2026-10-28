@@ -116,7 +116,7 @@
 
     // him, from behind his shoulder, looking up at the screen
     const b = FIG.bust({up: -24}, 9);
-    const me = fig(b.d, 352, 812, 4.7, {f: 'fuzzc', extra: FIG.eye(b.eye, .95, 1.1, -32)});
+    const me = fig(b.d, 352, 812, 4.7, {f: 'fuzzc', extra: FIG.eye(b.eye, 1.25, 1.1, b.tilt)});
     // leaves of a plant right against the lens
     let leaves = '';
     for (let i = 0; i < 9; i++) {

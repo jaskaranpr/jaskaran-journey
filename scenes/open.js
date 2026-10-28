@@ -36,7 +36,7 @@ scene('open', {
         <rect x="-600" y="-300" width="2800" height="1500" fill="url(#opClose)"/>
         ${beam({x: 1040, y: -120, top: 120, spread: 760, h: 1150, o: .5, tilt: -220})}`},
       {z: 0, cls: 'oc', html: dust([[980, -60], [1100, -60], [1200, 940], [440, 940]], 60, 9, .2)},
-      {z: 0, cls: 'oc oc-fig', svg: `<g transform="translate(610 690) scale(7.4)"><path d="${close.d}" filter="url(#fuzzc)" fill="${C.w}"/>${FIG.eye(FIG.add(close.eye, FIG.P(-2.6, .9)), .78, 1, -34)}</g>`},
+      {z: 0, cls: 'oc oc-fig', svg: `<g transform="translate(610 690) scale(7.4)"><path d="${close.d}" filter="url(#fuzzc)" fill="${C.w}"/>${FIG.eye(close.eye, 1.25, 1, close.tilt)}</g>`},
     ];
   },
   cam: p => ({zoom: 1 + .34 * K.ease(K.clamp(p / .52)), ox: 800, oy: 560, y: -14 * K.clamp(p / .52)}),

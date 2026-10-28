@@ -127,7 +127,7 @@
           <g id="maPhone"><circle id="maBloom" r="300" fill="url(#gGlow)" opacity="0"/>
             <g id="maHand"><path d="${palm}" fill="${C.w}" filter="url(#fuzz)"/></g>${phone}<g id="maGrip"><path d="${grip}" fill="${C.w}" filter="url(#fuzz)"/></g></g>`},
         {z: 1.1, svg: icons(INSTA, 'maI') + icons(TUBE, 'maT')},
-        {z: 1.25, svg: `<g id="maMe" transform="translate(400 790) scale(5.6)"><path d="${ME.d}" filter="url(#fuzzc)" fill="${C.w}"/>${FIG.eye(ME.eye, .95, 1, -34)}</g>`},
+        {z: 1.25, svg: `<g id="maMe" transform="translate(400 790) scale(5.6)"><path d="${ME.d}" filter="url(#fuzzc)" fill="${C.w}"/>${FIG.eye(ME.eye, 1.25, 1, ME.tilt)}</g>`},
         {z: 1.5, cls: 'blur6', svg: fg},
       ];
     },

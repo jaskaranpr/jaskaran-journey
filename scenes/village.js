@@ -114,18 +114,26 @@
       for (let i = 0; i < 14; i++) mid += poplar(n1(1190 + i * 30 + r() * 10), HZ + 44 + i * 1.2, 120 + r() * 40, C.b2, C.b5, r);
       for (let i = 0; i < 8; i++) mid += kikar(n1(1720 + i * 110 + r() * 30), HZ + 40, .7 + r() * .25, C.b3, C.b5, 10 + i);
 
-      // nearer: a wheat field, every stalk drawn, catching the low sun on its right side
+      // nearer: a wheat field, every stalk drawn (1,680 of them), catching the low sun on its right side
       let wheat = `<rect x="-400" y="640" width="3400" height="400" fill="${C.b3}"/><rect x="-400" y="636" width="3400" height="10" fill="${C.b4}" filter="url(#b3)"/>`;
+      // each ear is a slim tapered spindle with awns fanning off its upper half; every stalk of one colour shares a path
       for (let g = 0; g < 8; g++) {
-        let grp = '';
-        for (let i = 0; i < 150; i++) {
+        const stem = ['', ''], ear = ['', ''], awn = [''], lit = [''];
+        for (let i = 0; i < 210; i++) {
           const x = -300 + g * 400 + r() * 420, y = 650 + Math.pow(r(), .8) * 140, h = 22 + (y - 650) * .3 + r() * 16, l = (r() - .4) * 9;
-          const ex = x + l, ey = y - h;
-          grp += `<path d="M${n1(x)} ${n1(y)}Q${n1(x + l * .4)} ${n1(y - h * .5)} ${n1(ex)} ${n1(ey)}" stroke="${r() < .5 ? C.b2 : C.b3}" stroke-width="1.5" fill="none"/>` +
-            `<ellipse cx="${n1(ex)}" cy="${n1(ey - 5)}" rx="2.6" ry="7" fill="${r() < .3 ? C.b5 : C.b4}" transform="rotate(${n1(l * 3)} ${n1(ex)} ${n1(ey - 5)})"/>` +
-            (r() < .45 ? `<path d="M${n1(ex + 1.6)} ${n1(ey - 11)}q1 6 0 11" stroke="${C.b6}" stroke-width="1.1" fill="none" opacity=".7"/>` : '');
+          const ex = x + l, ey = y - h, k = .8 + (y - 650) / 280, tilt = l * .07, c = r() < .3 ? 1 : 0;
+          stem[r() < .5 ? 0 : 1] += `M${n1(x)} ${n1(y)}Q${n1(x + l * .4)} ${n1(y - h * .5)} ${n1(ex)} ${n1(ey)}`;
+          const len = 13 * k, w = 2.4 * k, tx = ex + tilt * len, ty = ey - len;
+          ear[c] += `M${n1(ex)} ${n1(ey)}Q${n1(ex - w + tilt * len * .4)} ${n1(ey - len * .4)} ${n1(tx)} ${n1(ty)}Q${n1(ex + w + tilt * len * .4)} ${n1(ey - len * .4)} ${n1(ex)} ${n1(ey)}Z`;
+          for (const [t, sd] of [[.45, -1], [.6, 1], [.75, -1], [.9, 1], [1, 0]]) {
+            const ax = ex + tilt * len * t + sd * w * (1.1 - t) * .8, ay = ey - len * t;
+            awn[0] += `M${n1(ax)} ${n1(ay)}l${n1(sd * 2.2 * k + tilt * 5)} ${n1(-7 * k)}`;
+          }
+          if (r() < .45) lit[0] += `M${n1(ex + 2.4 * k)} ${n1(ey - 12 * k)}q1 ${n1(6 * k)} 0 ${n1(11 * k)}`;
         }
-        wheat += grp;
+        wheat += `<path d="${stem[0]}" stroke="${C.b2}" stroke-width="1.5" fill="none"/><path d="${stem[1]}" stroke="${C.b3}" stroke-width="1.5" fill="none"/>` +
+          `<path d="${awn[0]}" stroke="${C.b5}" stroke-width=".6" fill="none" opacity=".8"/>` +
+          `<path d="${ear[0]}" fill="${C.b4}"/><path d="${ear[1]}" fill="${C.b5}"/><path d="${lit[0]}" stroke="${C.b6}" stroke-width="1.1" fill="none" opacity=".7"/>`;
       }
 
       // near: the road, power lines and the school at the end of the road

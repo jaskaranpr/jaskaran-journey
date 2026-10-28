@@ -5,7 +5,7 @@
   const {C, rng, keys, span, n1, beam, pool, dust, fig} = K;
   const FLOOR = 770, DESK = 612, KS = 1.95, KX = 668;   // floor and desk-top lines, board units per cm, where he sits
   // the close-up: his head and shoulders, scaled from the bust's centimetres; it pushes in towards the screen at the right
-  const BUST = FIG.bust({up: -6}, 23), BX = 1010, BY = 600, BS = 8, EX = BX + (BUST.eye.x - 2.6) * BS;
+  const BUST = FIG.bust({up: -6}, 23), BX = 1010, BY = 600, BS = 8, EX = BX + BUST.eye.x * BS;
   const push = p => keys(p, [[.46, 1.05], [.84, 1.11], [1, 1.8]]);
   const drift = p => keys(p, [[.46, 30], [.84, 0], [1, -140]]);
   const tall = () => innerWidth < innerHeight;
@@ -152,7 +152,7 @@
       ];
       // the close-up: his head and shoulders in the light of the screen
       const b = BUST;
-      const eye = FIG.eye({x: b.eye.x - 2.6, y: b.eye.y + .4}, 1, 1, -16);
+      const eye = FIG.eye(b.eye, 1.25, 1, b.tilt);
       const cbg = `<linearGradient id="lpCbg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#041d45"/><stop offset=".7" stop-color="${C.b1}"/><stop offset="1" stop-color="${C.b3}"/></linearGradient>
         <rect x="-400" y="-300" width="2600" height="1500" fill="url(#lpCbg)"/>
         <rect x="120" y="120" width="300" height="360" fill="${C.b3}" opacity=".5" filter="url(#b30)"/>
