@@ -1,8 +1,8 @@
 # jaskaran-journey
 
-My portfolio as a short story you scroll through. Each chapter is an illustrated scene; the words fade in as you go, and quiet music plays underneath if you turn the sound on.
+My portfolio as a short story you scroll through. One white line runs through the whole thing: it's the ground I walk on, and it draws each place as I get there, from the village in Punjab where I grew up to the charts I build now. I'm drawn as a soft white figure, moving with real motion-captured animation.
 
-Plain HTML, CSS and JS. No build step, no libraries.
+Plain HTML, CSS and JS with no build step.
 
 ```sh
 python3 -m http.server
@@ -12,27 +12,35 @@ Then open http://localhost:8000.
 
 ## How it fits together
 
-- `story.js` is the text: every scene in order, what you read in it, where the words sit and when they come in.
-- `scenes/<id>.js` draws one scene. Each scene is painted on a 1600 × 900 board in layers, back to front.
-- `engine.js` turns scrolling into a camera move through those layers and fades the words in and out.
-- `figure.js` draws me. It's a skeleton measured in centimetres (I'm 5'10"), so the same code can stand, walk, sit, ride a bicycle and lie in the grass. A filter in `index.html` gives every body the soft, frayed edge from the film.
-- `kit.js` holds the shared drawing pieces: the colours, light beams, dust, mist, reflections and birds.
-- `sound.js` makes the music live in the browser, so there's no audio file to load. A few soft piano notes repeat on loops of different lengths, the way Brian Eno made *Music for Airports*, so they keep meeting in new combinations. Under them, a slow pad changes chord with each chapter.
-- `pens/` holds screenshots of my CodePen work.
+- `story.js` is the text: every chapter in order, what you read in it and when, its colour and its music.
+- `chapters/<id>.js` draws one chapter as line art on a 1600 × 900 board and says where I am and what I'm doing at every moment of it. `chapters/_lines.js` holds the shared drawing pieces, and the film's eye that Jassi and the end card use.
+- `js/main.js` is the engine. The whole story is one GSAP timeline measured in screens, and the scroll position scrubs it, smoothed by Lenis. Scroll back and everything plays in reverse, exactly.
+- `js/figure3d.js` draws me: a rigged mannequin from three.js playing motion-captured clips, filled out a little so it reads as clothed, with a mop of curls. A shader gives it the film's soft, frayed white edge. On pale chapters I'm drawn in ink.
+- `models/` holds the two rigs and their clips, trimmed to what the story uses and compressed (about 700 KB together).
+- `sound.js` makes the music live in the browser: soft piano notes on loops of different lengths, over a pad chord that changes with each chapter.
 
-## Adding or changing a scene
+## A chapter
 
-A scene file calls `scene(id, {...})`:
+```js
+chapter('id', {
+  backArt: () => '...svg...',     // drawn behind me (inside a camera group, board units)
+  frontArt: () => '...svg...',    // drawn in front of me
+  build(tl, $) { ... },           // tweens on the chapter's own timeline, 0..len screens
+  fig: (t, life) => pose,         // where I am and what I'm doing at time t (life: seconds, for idle breathing)
+  view: (t, narrow) => ({x, y, zoom}),
+  alive: true,                    // keep animating while the reader is stopped
+  css: '...',
+});
+```
 
-- `layers()` returns the layers, back to front. Each is `{z, svg}` or `{z, html}`. `z` sets how far it moves when the camera moves: 0 stays put like the sky, 1 moves with the subject, and more than 1 is foreground that sweeps past. `cls: 'blur6'` puts a layer out of focus.
-- `cam(p)` returns the camera for progress `p` (0 to 1 through the scene): `{x, y, zoom, ox, oy}` in board units.
-- `init(stage)` runs once after the layers are on the page, for looking up elements `frame` will move.
-- `frame(p, stage)` runs on every scroll frame, for things like his walk or the bicycle wheels. Keep it cheap: change a few attributes, not a CSS variable that hundreds of elements inherit.
-- `focus` is the board x that phones should keep in view. It can be a function of `p` when the subject moves.
-- `css` is extra CSS for the scene.
+A pose is `{lib, clip, ct, x, y, s, yaw, kid, far, props, hold}`, all in board units. `L.draw(tl, paths, at, dur)` draws lines on, `L.stride()` keeps a walk's feet planted, `L.par()` pins things to a far layer, and `L.fit()` keeps me in frame on phones. Groups with `data-depth` slide at their own speed when the camera moves.
 
-Then add the scene to `story.js` and a `<script>` tag to `index.html`.
+## Credits
+
+- Animation and mannequin: [Universal Animation Library](https://quaternius.com/packs/universalanimationlibrary.html) 1 and 2 by Quaternius, CC0.
+- [three.js](https://threejs.org) (MIT), [GSAP](https://gsap.com) with ScrollTrigger and SplitText (free under GSAP's standard license), [Lenis](https://lenis.darkroom.engineering) (MIT).
+- Fonts: [Figtree](https://fonts.google.com/specimen/Figtree) and Noto Sans Gurmukhi (SIL Open Font License).
 
 ## Style
 
-The look follows Fold's "Tag Your Transactions" film: one blue and white, a fuzzy white figure, light from above, grain over everything. The font is Figtree, the closest free match to the film's GT Walsheim.
+The look follows Fold's "Tag Your Transactions" film: one blue and white, a soft white figure, light from above, grain over everything. Figtree stands in for the film's GT Walsheim. The single continuous line is borrowed from the grammar of one-line storytelling, as on [gianlucaboccia.me](https://www.gianlucaboccia.me/).
